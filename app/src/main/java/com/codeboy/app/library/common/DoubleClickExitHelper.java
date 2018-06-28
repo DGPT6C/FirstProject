@@ -53,9 +53,12 @@ public class DoubleClickExitHelper {
 		} else {
 			isOnKeyBacking = true;
 			if(mBackToast == null) {
+				//显示时间为3秒
 				mBackToast = Toast.makeText(mActivity, R.string.back_exit_tips, 3000);
 			}
 			mBackToast.show();
+			//线程沉睡时间为3秒，在3秒之内再次按下back则直接退出应用
+			//postDelayed 在一段时间之后，执行新的线程，即可以达到一段特定程序延迟执行的目的
 			mHandler.postDelayed(onBackTimeRunnable, 3000);
 			return true;
 		}

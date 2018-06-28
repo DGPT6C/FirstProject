@@ -64,7 +64,8 @@ public class MainActivity extends BaseActionBarActivity implements DrawerMenuCal
 		CONTENT_TAG_SOFTWARE,
 		CONTENT_TAG_ACTIVE
 	};
-	
+
+	//获取每个Fragment的名字
 	static final String FRAGMENTS[] = {
 		NewsMainFragment.class.getName(),
 		QAMainFragment.class.getName(),
@@ -72,7 +73,8 @@ public class MainActivity extends BaseActionBarActivity implements DrawerMenuCal
 		SoftwareMainFragment.class.getName(),
 		ActiveMainFragment.class.getName()
 	};
-	
+
+	//Menu右滑菜单的标题
 	static final int TITLES[] = {
 		R.string.frame_title_news,
 		R.string.frame_title_question_ask,
@@ -88,7 +90,7 @@ public class MainActivity extends BaseActionBarActivity implements DrawerMenuCal
     
     //当前显示的界面标识
     private String mCurrentContentTag;
-    
+
     private ActionBar mActionBar;
     private DoubleClickExitHelper mDoubleClickExitHelper;
 	
@@ -103,29 +105,43 @@ public class MainActivity extends BaseActionBarActivity implements DrawerMenuCal
 			//友盟检查更新
 			UmengUpdateAgent.update(this);
 		}
-		
+
+		//初始化ActionBar
+		//https://blog.csdn.net/guolin_blog/article/details/18234477
+		//https://blog.csdn.net/guolin_blog/article/details/25466665
 		mActionBar = getSupportActionBar();
 		mActionBar.setDisplayHomeAsUpEnabled(true);
 		mActionBar.setHomeButtonEnabled(true);
 		
 		setContentView(R.layout.activity_main);
-		
+
+		//调用双击退出
 		mDoubleClickExitHelper = new DoubleClickExitHelper(this);
-		
+
+		//初始化FragmentManager,并设置DrawerLayout布局
 		mFragmentManager = getSupportFragmentManager();
 		mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
 		mDrawerLayout.setDrawerListener(new DrawerMenuListener());
 		mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
-		
+
+		//旋转特效按钮初始化
 		mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout,
                 R.drawable.ic_drawer, 0, 0);
-		
+
+		//savedInstanceState保存当时的状态
 		if(savedInstanceState == null) {
+		    // 添加Fragment前检查是否有保存的Activity状态。
+            // 如果有状态保存，说明Activity刚刚出现过异常被销毁过，现在正在恢复，我们不再replace Fragment。
+            // 如果没有状态保存 replace 则是先删除fragmentmanager中所有已添加的fragment中
+            // 容器id与当前要添加的fragment的容器id相同的fragment
+            // 然后再添加当前fragment；
+            // 结论：replace 会删除LinearLayout中所有fragment  ，然后再添加传入fragment对象
 			FragmentTransaction ft = mFragmentManager.beginTransaction();
 			ft.replace(R.id.drawer_menu, DrawerMenuFragment.newInstance(), DRAWER_MENU_TAG)
 			.replace(R.id.drawer_content, NewsMainFragment.newInstance(), CONTENT_TAG_NEWS)
 			.commit();
-			
+
+
 			mActionBar.setTitle(TITLES[0]);
 			mCurrentContentTag = CONTENT_TAG_NEWS;
 		}
@@ -136,14 +152,16 @@ public class MainActivity extends BaseActionBarActivity implements DrawerMenuCal
 		super.onPostCreate(savedInstanceState);
 		mDrawerToggle.syncState();
 	}
-	
+
+	//找ActionBar 中 自定义menu 控件
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		MenuInflater inflater = getMenuInflater();
 		inflater.inflate(R.menu.main, menu);
 		return true;
 	}
-	
+
+   //点击menu控件后做的事情
 	@Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (mDrawerToggle.onOptionsItemSelected(item)) {
@@ -173,12 +191,16 @@ public class MainActivity extends BaseActionBarActivity implements DrawerMenuCal
 		startActivity(intent);
 	}
 
+   // android:onConfigurationChanged实际对应的是Activity里的onConfigurationChanged()方法。
+   // 在AndroidManifest.xml中添加上诉代码的含义是表示在改变屏幕方向、弹出软件盘和隐藏软键盘时
+   // 不再去执行onCreate()方法，而是直接执行onConfigurationChanged()
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         mDrawerToggle.onConfigurationChanged(newConfig);
     }
-	
+
+    //监听back按键
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		if(keyCode == KeyEvent.KEYCODE_BACK) {
