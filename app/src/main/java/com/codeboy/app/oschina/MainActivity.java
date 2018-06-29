@@ -220,7 +220,7 @@ public class MainActivity extends BaseActionBarActivity implements DrawerMenuCal
 		String tag = CONTENTS[pos];
 		if(tag.equals(mCurrentContentTag)) {
 			if(L.Debug) {
-				L.d("show content:" + tag);
+				L.d("show content:" + tag);//输出对应的content
 			}
 			return;
 		}
