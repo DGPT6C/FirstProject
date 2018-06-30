@@ -20,30 +20,44 @@ import net.oschina.app.core.AppContext;
  */
 public class MessageData<Result extends PageList<?>>{
 
+	//数据状态码
+	//错误
 	public static final int MESSAGE_STATE_ERROR = -1;
+	//空值
 	public static final int MESSAGE_STATE_EMPTY = 0;
+	//更多数据
 	public static final int MESSAGE_STATE_MORE = 1;
+	//正在加载
 	public static final int MESSAGE_STATE_FULL = 2;
 	
 	
 	public int state;
 	public Result result;
 	public Exception exception;
-	
+
+	//传入状态码时调用
 	public MessageData(int state) {
 		this.state = state;
 		this.result = null;
 		this.exception = null;
 	}
-	
+
+	//传入返回时调用
+    //Result引用PageList接口，实现每个版块的类的集合
 	public MessageData(Result result) {
 		if(result != null) {
+			//获取某版块的现有的页数中显示的item数量
 			int size = result.getPageSize();
+			//当该版块现有页数中显示的item数量为0
 			if(size == 0) {
 				this.state = MESSAGE_STATE_EMPTY;
-			} else if(size < AppContext.PAGE_SIZE) {
+			}
+			//当该版块现有页数中显示的item数量小于总的显示item数量
+			else if(size < AppContext.PAGE_SIZE) {
 				this.state = MESSAGE_STATE_FULL;
-			} else {
+			}
+			//当该版块现有页数中显示的item数量等于总的显示item数量
+			else {
 				this.state = MESSAGE_STATE_MORE;
 			}
 		} else {
@@ -52,7 +66,8 @@ public class MessageData<Result extends PageList<?>>{
 		this.result = result;
 		this.exception = null;
 	}
-	
+
+	//当有错误时调用
 	public MessageData(Exception exception) {
 		this.state = MESSAGE_STATE_ERROR;
 		this.result = null;

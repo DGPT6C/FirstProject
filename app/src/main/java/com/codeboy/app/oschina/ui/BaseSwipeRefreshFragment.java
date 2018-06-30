@@ -46,7 +46,8 @@ import android.widget.TextView;
 public abstract class BaseSwipeRefreshFragment <Data extends Entity, Result extends PageList<Data>> 
 	extends BaseFragment implements SwipeRefreshLayout.OnRefreshListener, OnItemClickListener,
 	AbsListView.OnScrollListener {
-	
+
+	//UI状态码
 	//没有状态
 	public static final int LISTVIEW_ACTION_NONE = -1;
 	//更新状态，不显示toast
@@ -57,13 +58,19 @@ public abstract class BaseSwipeRefreshFragment <Data extends Entity, Result exte
 	public static final int LISTVIEW_ACTION_REFRESH = 2;
 	//下拉到底部时，获取下一页的状态
 	public static final int LISTVIEW_ACTION_SCROLL = 3;
-	
+
+	//自定义状态码
+	//没有状态
 	static final int STATE_NONE = -1;
+	//正在读取状态
 	static final int STATE_LOADING = 0;
+	//读取结束状态
 	static final int STATE_LOADED = 1;
 
+	//创建Application方法
 	protected OSChinaApplication mApplication;
-	
+
+	//创建SwipRefreshLayout
 	protected SwipeRefreshLayout mSwipeRefreshLayout;
 	protected ListView mListView;
 	private View mHeaderView;
@@ -72,7 +79,8 @@ public abstract class BaseSwipeRefreshFragment <Data extends Entity, Result exte
 	
 	private View mFooterProgressBar;
 	private TextView mFooterTextView;
-	
+
+	//实体类集合
 	private List<Data> mDataList = new ArrayList<Data>();
 	//当前页面已加载的数据总和
 	private int mSumData;
@@ -85,9 +93,11 @@ public abstract class BaseSwipeRefreshFragment <Data extends Entity, Result exte
 	//当前数据状态，如果是已经全部加载，则不再执行滚动到底部就加载的情况
 	private int mMessageState = MessageData.MESSAGE_STATE_MORE;
 	private boolean isPauseLife = true;
-	
+
+	//数据请求
 	private DataRequestThreadHandler mRequestThreadHandler = new DataRequestThreadHandler();
-	
+
+	//当Activity与Fragment发生关联时调用
 	@Override
 	public void onAttach(Activity activity) {
 		super.onAttach(activity);
@@ -97,6 +107,7 @@ public abstract class BaseSwipeRefreshFragment <Data extends Entity, Result exte
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		//获取当前fragment的Adapter
 		mAdapter = getAdapter(mDataList);
 		//初始化数据,只有首发创建时调用，如果因viewpager里划动而销毁，
 		//再次创建只会调用onActivityCreated-->onCreateView-->onViewCreated
@@ -125,18 +136,26 @@ public abstract class BaseSwipeRefreshFragment <Data extends Entity, Result exte
 		super.onDestroy();
 		mRequestThreadHandler.quit();
 	}
-	
+
+	//onCreateView是创建该fragment对应的视图，在这里创建视图并返回给调用者
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
 		mHeaderView = getHeaderView(inflater);
+		//LayoutInflater类的inflate方法适用于所有需要进行布局填充的场景，是Android中专门进行布局填充的方法，Android中其他需要
+		//使用布局填充的地方，都会调用本方法，而不是View类中的inflate方法。该方法不是静态方法，需要先创建LayoutInflater类的对象
+		//才能调用。
+		//
+		//View类中的inflate方法内部包裹了LayoutInflater类的inflate方法，这个方法是一个静态方法，不需要创建View类的对象，直接使用
+		//View类名调用，相比上一种方法是一种简便方法。但很明显，这个方法不如上一个方法功能强大。
 		mFooterView = inflater.inflate(R.layout.listview_footer, null);
 		mFooterProgressBar = mFooterView.findViewById(R.id.listview_foot_progress);
 		mFooterTextView = (TextView) mFooterView.findViewById(R.id.listview_foot_more);
 		
 		return inflater.inflate(R.layout.fragment_base_swiperefresh, null);
 	}
-	
+
+
 	@Override
 	public void onViewCreated(View view, Bundle savedInstanceState) {
 		mSwipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.fragment_swiperefreshlayout);
@@ -144,9 +163,9 @@ public abstract class BaseSwipeRefreshFragment <Data extends Entity, Result exte
 		
 		mSwipeRefreshLayout.setOnRefreshListener(this);
 		mSwipeRefreshLayout.setColorScheme(
-				R.color.swiperefresh_color1, 
-				R.color.swiperefresh_color2, 
-				R.color.swiperefresh_color3, 
+				R.color.swiperefresh_color1,
+				R.color.swiperefresh_color2,
+				R.color.swiperefresh_color3,
 				R.color.swiperefresh_color4);
 		
 		setupListView();
@@ -201,7 +220,7 @@ public abstract class BaseSwipeRefreshFragment <Data extends Entity, Result exte
 	
 	/** 加载下一页*/
 	protected void onLoadNextPage() {
-		// 当前pageIndex
+		// 当前页面总数
 		int pageIndex = mSumData / AppContext.PAGE_SIZE;
 		if(L.Debug) {
 			L.d("加载下一页:" + pageIndex);
@@ -290,6 +309,7 @@ public abstract class BaseSwipeRefreshFragment <Data extends Entity, Result exte
 			return;
 		}
 		if(mHeaderView != null) {
+			//第一个位置被tab所占用，所以所点击的position则应该是+1的
 			position = position - 1;
 		}
 		Data data = getData(position);
@@ -310,7 +330,8 @@ public abstract class BaseSwipeRefreshFragment <Data extends Entity, Result exte
 	public Data getData(int position) {
 		return mDataList.get(position);
 	}
-	
+
+
 	@Override
 	public void onScrollStateChanged(AbsListView view, int scrollState) {
 		Adapter adapter = view.getAdapter();
